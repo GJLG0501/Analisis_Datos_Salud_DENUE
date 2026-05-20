@@ -1,0 +1,604 @@
+\documentclass[twocolumn, 10pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{parskip}
+\usepackage{cite}
+
+\geometry{
+  top=1.8cm, bottom=1.8cm,
+  left=1.5cm, right=1.5cm,
+  columnsep=0.6cm
+}
+
+\captionsetup{font=small, labelfont=bf}
+\captionsetup[subfigure]{font=scriptsize, labelfont=bf}
+
+\title{%
+  \large\textbf{Análisis de Datos Económicos Geolocalizados}\\
+  \textbf{mediante Persistencia Homológica:}\\
+  \textbf{Servicios de Salud General en Iztapalapa, CDMX}
+}
+
+\author{%
+  % Nombre Apellido$^{1}$, Nombre Apellido$^{2}$\\[4pt]
+  % \small $^{1,2}$Tecnológico de Monterrey\\
+  % \small \texttt{correo@tec.mx}
+}
+
+\date{Mayo 2026}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+% ═══════════════════════════════════════
+\begin{abstract}
+Este trabajo aplica persistencia homológica al análisis de los datos
+del Directorio Estadístico Nacional de Unidades Económicas (DENUE 2025)
+en la alcaldía Iztapalapa, Ciudad de México.
+A partir de 563 establecimientos de salud general georreferenciados,
+se construyen complejos simpliciales de Vietoris--Rips y Alpha
+(equivalente homológico al complejo de \v{C}ech) para calcular la
+persistencia en dimensiones $H_0$ (conectividad) y $H_1$ (vacíos de
+cobertura).
+Los resultados muestran que el $87.4\%$ son consultorios privados, con
+distancia mediana entre vecinos de 161.71\,m.
+Se identifican ciclos $H_1$ persistentes que señalan zonas con anillos
+de cobertura pero sin servicio interior, constituyendo candidatos
+prioritarios para la instalación de nuevas unidades públicas de salud.
+\end{abstract}
+
+% ═══════════════════════════════════════
+\section{Introducción}
+
+La distribución espacial de los servicios de salud determina el acceso
+efectivo de la población a la atención médica.
+Métodos clásicos de análisis geoespacial —radios de influencia,
+índices de densidad— no capturan la \emph{forma global} de la red ni
+sus vacíos estructurales a múltiples escalas.
+La \textbf{persistencia homológica} permite extraer características
+topológicas intrínsecas: componentes conectadas ($H_0$), ciclos ($H_1$)
+y cavidades ($H_2$) que persisten ante variaciones de escala.
+
+El presente estudio aplica este enfoque a los establecimientos de
+salud general (consultorios, clínicas y hospitales, códigos SCIAN
+621111--622112) en Iztapalapa, la alcaldía más poblada de la Ciudad
+de México ($\approx$1.8 millones de habitantes).
+El objetivo es identificar patrones de conectividad y vacíos
+persistentes de cobertura que orienten decisiones de política pública
+y estrategia de negocio en el sector salud.
+
+% ═══════════════════════════════════════
+\section{Metodología}
+
+\subsection{Preparación de los datos}
+
+Se utilizan los datos abiertos del DENUE 2025 (INEGI) \cite{denue},
+filtrando los registros con \texttt{cve\_ent}$=9$ y
+\texttt{cve\_mun}$=10$ (Iztapalapa).
+Se seleccionaron seis códigos SCIAN de salud general.
+Tras la limpieza, se obtienen $n=563$ puntos con coordenadas válidas.
+
+La Figura~\ref{fig:descriptivo} muestra la composición del conjunto de
+datos: el $79.6\%$ corresponde a consultorios privados ($n=448$),
+seguido de clínicas públicas ($6.6\%$) y clínicas privadas ($5.0\%$).
+El $87.4\%$ pertenece al sector privado.
+La Figura~\ref{fig:mapa_puntos} muestra la distribución geográfica de
+todos los establecimientos dentro del límite de la alcaldía.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]%
+    {outputs/figures/01_barras_tipo_establecimiento.jpg}
+  \caption{Conteo de establecimientos por tipo. Dominio de consultorios
+    generales privados ($n=448$, $79.6\%$).}
+  \label{fig:descriptivo}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]%
+    {outputs/figures/06_mapa_puntos_por_tipo.jpg}
+  \caption{Distribución geográfica de los 563 establecimientos de salud
+    general en Iztapalapa, coloreados por tipo.}
+  \label{fig:mapa_puntos}
+\end{figure}
+
+Las coordenadas se proyectan al sistema UTM zona 14N (EPSG:32614) para
+operar en metros.
+Se calculan variables derivadas: sector (público/privado), distancia al
+vecino más cercano (BallTree haversine) e indicador de aislamiento
+(percentil 90, umbral $359\,\text{m}$).
+
+\subsection{Construcción de complejos simpliciales}
+
+Sea $X=\{x_1,\ldots,x_{563}\}\subset\mathbb{R}^2$ la nube proyectada
+y centrada.
+Se construyen dos familias de complejos:
+
+\textbf{Vietoris--Rips} $\mathrm{VR}(r)$: $\sigma\subseteq X$ es un
+símplice si $d(x_i,x_j)\leq r$ para todo par.
+Se evalúan radios $r\in\{300,700,1200,2000\}$\,m para visualización
+(submuestra $n=80$) y $r_{\max}=5{,}000$\,m para la persistencia
+completa, usando \texttt{Ripser} \cite{ripser}.
+
+La Figura~\ref{fig:vr_evolucion} ilustra la evolución del complejo al
+crecer el radio: a $r=300$\,m sólo existen 15~aristas locales; a
+$r=700$\,m emergen los primeros ciclos de corto alcance; a
+$r=1{,}200$\,m se consolidan triángulos en las zonas más densas; a
+$r=2{,}000$\,m la red alcanza 295~aristas y conecta la mayor parte
+de la alcaldía.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\linewidth]%
+      {outputs/figures/vr_radio_300m.jpg}
+    \caption{$r=300$\,m — 15 aristas}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\linewidth]%
+      {outputs/figures/vr_radio_700m.jpg}
+    \caption{$r=700$\,m — ciclos emergentes}
+  \end{subfigure}
+
+  \vspace{4pt}
+
+  \begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\linewidth]%
+      {outputs/figures/vr_radio_1200m.jpg}
+    \caption{$r=1{,}200$\,m — triángulos}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\linewidth]%
+      {outputs/figures/vr_radio_2000m.jpg}
+    \caption{$r=2{,}000$\,m — 295 aristas}
+  \end{subfigure}
+  \caption{Crecimiento del complejo Vietoris--Rips sobre submuestra
+    $n=80$ en Iztapalapa. Los puntos rojos son establecimientos;
+    las aristas en azul conectan pares con $d\leq r$; los triángulos
+    azul claro indican 2-símplices.}
+  \label{fig:vr_evolucion}
+\end{figure}
+
+\textbf{Complejo Alpha} $\mathrm{Alpha}(\alpha)$: subconjunto de la
+triangulación de Delaunay que satisface $H_*(\mathrm{Alpha}(\alpha))
+\cong H_*(\check{C}(r))$ \cite{edelsbrunner}, construido con
+\texttt{GUDHI} \cite{gudhi}.
+La relación de intercalación
+$\mathrm{VR}(r)\subseteq\check{C}(r)\subseteq\mathrm{VR}(2r)$
+garantiza equivalencia homológica.
+
+La Figura~\ref{fig:complejos} compara ambos complejos a radio
+equivalente: el VR a $r=1{,}000$\,m y el Alpha con
+$\alpha^2\leq700^2$\,m$^2$; ambos comparten la misma homología
+pero el Alpha requiere significativamente menos símplices.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\linewidth]%
+      {outputs/figures/complejo_vietoris_rips_iztapalapa_1000m.jpg}
+    \caption{Vietoris--Rips ($r=1000$\,m)}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\linewidth}
+    \includegraphics[width=\linewidth]%
+      {outputs/figures/12_complejo_alpha_iztapalapa.jpg}
+    \caption{Alpha / \v{C}ech ($\alpha^2\leq700^2$\,m$^2$)}
+  \end{subfigure}
+  \caption{Complejos simpliciales sobre submuestra $n=80$ con el límite
+    de Iztapalapa. Aristas en azul, triángulos en azul claro,
+    vértices en rojo.}
+  \label{fig:complejos}
+\end{figure}
+
+\subsection{Persistencia homológica}
+
+Se calcula la persistencia con coeficientes en $\mathbb{Z}/2\mathbb{Z}$
+mediante el algoritmo de reducción de matrices \cite{edelsbrunner}.
+Cada característica queda descrita por un par $(b,d)$
+—nacimiento y muerte— visualizado con:
+
+\begin{itemize}
+  \item \textbf{Diagrama de barras} (\emph{barcode}): segmento $[b,d)$
+        por característica, ordenado por persistencia $d-b$.
+  \item \textbf{Diagrama de dispersión}: puntos $(b,d)$ donde la
+        distancia a la diagonal indica la significancia.
+\end{itemize}
+
+La Figura~\ref{fig:barcodes} muestra los diagramas de barras para
+$H_0$ y $H_1$, y la Figura~\ref{fig:scatter} el diagrama de dispersión
+con los tres ciclos $H_1$ más persistentes anotados.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]%
+    {outputs/figures/13_barcodes_h0_h1.jpg}
+  \caption{Diagramas de barras. Izquierda: $H_0$ (componentes
+    conectadas). Derecha: $H_1$ (ciclos / vacíos de cobertura).
+    Las barras más largas indican características más persistentes.}
+  \label{fig:barcodes}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]%
+    {outputs/figures/14_diagrama_persistencia_mejorado.jpg}
+  \caption{Izquierda: diagrama de dispersión $H_0$ (azul) y $H_1$
+    (naranja); C1--C3 son los ciclos más persistentes. Derecha:
+    ranking de persistencias $H_1$.}
+  \label{fig:scatter}
+\end{figure}
+
+% ═══════════════════════════════════════
+\section{Resultados}
+
+\subsection{Conectividad (\texorpdfstring{$H_0$}{H0})}
+
+El barcode $H_0$ muestra 562 componentes finitas que se fusionan
+progresivamente.
+La mediana del radio de fusión es $161.71\,\text{m}$, indicando que
+la mitad de los establecimientos tienen un vecino a distancia
+caminable.
+A $r\approx500\,\text{m}$ la red ya está mayoritariamente conectada;
+a $r=1{,}000\,\text{m}$ quedan menos de 10 componentes.
+Los 57 establecimientos aislados (umbral $359\,\text{m}$) se
+concentran en la periferia sur-oriente.
+
+\subsection{Vacíos de cobertura (\texorpdfstring{$H_1$}{H1})}
+\label{sec:resultados-h1}
+
+Los ciclos $H_1$ persistentes identifican \textbf{anillos de
+establecimientos con vacíos interiores}: zonas donde la cobertura
+circunda pero no penetra.
+De los $110$ ciclos detectados, $14$ son significativos
+($d-b>\mu+\sigma=317$\,m), con persistencia máxima de $1{,}377$\,m
+(Figura~\ref{fig:vacios_h1}).
+Los tres ciclos más persistentes (C1--C3, Figura~\ref{fig:scatter})
+señalan brechas estructurales de acceso a salud, no atribuibles a
+ruido topológico.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]%
+    {outputs/figures/17_vacios_cobertura_h1.jpg}
+  \caption{Izquierda: nacimiento del ciclo vs.\ persistencia, con
+    umbral de significancia $\mu+\sigma$. Derecha: histograma de
+    persistencias $H_1$. Los $14$ ciclos a la derecha del umbral
+    corresponden a vacíos topológicos significativos.}
+  \label{fig:vacios_h1}
+\end{figure}
+
+\subsection{Comparación por sector}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Estadísticas por sector.}
+\label{tab:sector}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Métrica} & \textbf{Privado} & \textbf{Público} \\
+\midrule
+Establecimientos   & 492 (87.4\%) & 71 (12.6\%) \\
+Dist. mediana (m)  & $\sim$155 & $\sim$800 \\
+Aislados (p90)     & 47 & 10 \\
+Persistencia $H_1$ & baja varianza & alta varianza \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La red pública, más dispersa, genera ciclos $H_1$ de mayor
+persistencia individual —brechas de acceso más críticas— respecto a
+la red privada, cuya mayor densidad produce ciclos más cortos y
+numerosos.
+La Figura~\ref{fig:aislados} localiza los $57$ establecimientos
+aislados ($d>359$\,m al vecino más cercano), concentrados en la franja
+sur-oriente de la alcaldía.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]%
+    {outputs/figures/10_mapa_establecimientos_aislados.jpg}
+  \caption{Establecimientos aislados (estrellas) por tipo sobre la
+    nube general (gris). La concentración periférica anticipa la
+    localización de los huecos topológicos $H_1$.}
+  \label{fig:aislados}
+\end{figure}
+
+% ═══════════════════════════════════════
+\subsection{Propuesta de ubicación de nuevas unidades}
+\label{sec:propuesta}
+
+Para traducir el análisis topológico en una recomendación accionable
+se construye una \emph{simulación de inserción}: dado que los ciclos
+$H_1$ persistentes corresponden a anillos de cobertura con vacío
+interior, el centro de cada hueco es un candidato natural para una
+nueva unidad pública de salud.
+
+\textbf{Procedimiento.}
+(i)~Se construye una malla de $250\times250$ celdas sobre el
+\emph{bounding box} de Iztapalapa y se conservan los $29{,}017$
+puntos interiores al polígono.
+(ii)~Para cada punto se calcula la distancia euclidiana al
+establecimiento más cercano mediante \texttt{BallTree}.
+(iii)~Se identifican los máximos locales de esta función (ventana de
+$25$ celdas, umbral mínimo $400$\,m), que corresponden a los centros
+geométricos de los huecos.
+(iv)~Se seleccionan las $5$ ubicaciones con mayor déficit local
+(Tabla~\ref{tab:propuesta}).
+(v)~Se reinserta cada candidato en la nube y se recalcula la
+persistencia con \texttt{Ripser} para evaluar su efecto.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Cinco ubicaciones propuestas. ``Hueco'' = distancia al
+  establecimiento más cercano (m).}
+\label{tab:propuesta}
+\begin{tabular}{clcc}
+\toprule
+\textbf{ID} & \textbf{Colonia (CP)} & \textbf{Hueco} & \textbf{Lat,\,Lon} \\
+\midrule
+P1 & Leyes de Reforma 3a~Sec.~(09310) & 1{,}561 & 19.390,\,$-$99.087 \\
+P2 & Campestre Potrero (09637)        & 1{,}446 & 19.327,\,$-$98.991 \\
+P3 & Lomas de la Estancia (09640)     & 1{,}191 & 19.325,\,$-$99.007 \\
+P4 & Central de Abastos (09040)       & 1{,}169 & 19.377,\,$-$99.084 \\
+P5 & San Juan Xalpa (09849)           &    989  & 19.343,\,$-$99.091 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La Figura~\ref{fig:propuesta} sobrepone las cinco ubicaciones P1--P5
+sobre un mapa de calor de la distancia al servicio más cercano.
+Las zonas más rojas concentran los mayores déficits de cobertura
+interna y coinciden con los centros de los ciclos $H_1$ persistentes
+identificados en la Sección~\ref{sec:resultados-h1}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]%
+    {outputs/figures/20_propuesta_ubicaciones.jpg}
+  \caption{Propuesta de cinco nuevas unidades de salud (estrellas
+    verdes P1--P5). Fondo: distancia al establecimiento más cercano;
+    a mayor intensidad de rojo, mayor déficit local.}
+  \label{fig:propuesta}
+\end{figure}
+
+\textbf{Efecto sobre la topología.}
+La Figura~\ref{fig:simulacion} compara los diagramas de persistencia
+antes ($n=563$) y después ($n=568$).
+La persistencia máxima de $H_1$ se reduce de $1{,}377$\,m a $953$\,m
+(\textbf{31\,\% menos}), confirmando que los cinco puntos propuestos
+``cierran'' los ciclos más persistentes —es decir, eliminan los
+vacíos estructurales de mayor escala.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]%
+    {outputs/figures/21_simulacion_antes_despues.jpg}
+  \caption{Diagramas de persistencia antes y después de insertar las
+    cinco ubicaciones propuestas. Los ciclos $H_1$ más altos se
+    desplazan hacia la diagonal (menor persistencia): los huecos
+    topológicamente más grandes desaparecen.}
+  \label{fig:simulacion}
+\end{figure}
+
+\subsection{Validación territorial de vacíos topológicos}
+\label{sec:validacion}
+
+La persistencia homológica detecta huecos \emph{geométricos} en la
+red, pero éstos no necesariamente representan brechas reales de
+cobertura médica: un ciclo $H_1$ podría ubicarse sobre áreas verdes,
+cerros, mercados mayoristas o grandes equipamientos sin demanda
+residencial. Para evitar esta interpretación errónea se construye
+una \textbf{máscara de actividad urbana} basada en el DENUE
+\emph{completo} de CDMX (\textit{i.e.}, todos los giros económicos,
+no sólo salud), con $n=88{,}187$ unidades económicas y $719$ giros
+en Iztapalapa.
+
+\textbf{Criterio.} Una celda del grid se considera
+\emph{zona urbana activa} si su distancia al establecimiento DENUE
+más cercano (cualquier giro) es $\leq r_{\text{hab}}$.
+Se fija el umbral primario $r_{\text{hab}}=300$\,m (caminata de
+$\sim$4\,min) y se incluye una verificación de sensibilidad a
+$r_{\text{hab}}=500$\,m.
+A $r_{\text{hab}}=300$\,m la máscara cubre el $98.0\,\%$ del
+territorio interno de la alcaldía, confirmando que Iztapalapa es
+mayoritariamente habitada; los huecos no cubiertos coinciden con
+parques, zonas arqueológicas y la Sierra de Santa Catarina.
+
+\textbf{Clasificación de los candidatos.} Para cada candidato
+$P_i$ se aproxima su ``disco interior'' como un disco de radio
+$r_{\text{disco}}=\tfrac{1}{2}\,(\text{persistencia del hueco})$
+centrado en $P_i$. Se muestrean uniformemente $600$ puntos dentro
+del disco y se calcula el porcentaje que cae en zona urbana activa.
+La regla es:
+\begin{itemize}\itemsep0pt
+  \item $\geq 60\,\%$ urbano $\Rightarrow$ \textbf{accionable}
+  \item $\leq 40\,\%$ urbano $\Rightarrow$ \textbf{falso positivo}
+  \item $40\,\%$--$60\,\%$ $\Rightarrow$ \textbf{mixto / revisión}
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Validación territorial de los candidatos P1--P5. Las
+  columnas \%U\texorpdfstring{\textsubscript{300}}{300} y \%U\texorpdfstring{\textsubscript{500}}{500} dan el
+  porcentaje del interior dentro de zona urbana activa al umbral
+  indicado.}
+\label{tab:validacion}
+\begin{tabular}{cccl}
+\toprule
+\textbf{ID} & \textbf{\%U\textsubscript{300}} & \textbf{\%U\textsubscript{500}} & \textbf{Clase (300\,m)} \\
+\midrule
+P1 & 100.0 & 100.0 & accionable \\
+P2 & 37.3  & 76.6  & falso positivo \\
+P3 & 43.4  & 88.4  & mixto \\
+P4 & 100.0 & 100.0 & accionable \\
+P5 & 50.5  & 99.7  & mixto \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La Figura~\ref{fig:validacion} muestra (izquierda) la máscara binaria
+de actividad urbana con los cinco candidatos clasificados, y
+(derecha) el gradiente continuo de distancia al DENUE más cercano
+con la curva de nivel $r_{\text{hab}}=300$\,m. Los candidatos
+sobre la franja sur-oriente (P2, P3) caen parcialmente sobre la
+Sierra de Santa Catarina, lo que explica su clasificación como
+falso positivo o mixto.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]%
+    {outputs/figures/22_validacion_territorial.jpg}
+  \caption{Validación territorial. Izquierda: máscara binaria
+    ($r_{\text{hab}}=300$\,m) sobre el DENUE completo; verde claro =
+    zona urbana activa. Derecha: gradiente continuo de la distancia
+    al DENUE más cercano. Estrella = accionable, cuadrado = mixto,
+    \texttt{X} = falso positivo.}
+  \label{fig:validacion}
+\end{figure}
+
+\textbf{Sensibilidad al umbral.}
+La Figura~\ref{fig:sensibilidad} compara las máscaras a $300$ y
+$500$\,m. Subir el umbral a $500$\,m cubre el $99.7\,\%$ del
+territorio y reclasifica P2, P3, P5 como accionables; sólo el
+interior periférico de la Sierra queda fuera. Conservadoramente,
+adoptamos el umbral $300$\,m como criterio principal y reportamos
+$500$\,m como cota superior.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]%
+    {outputs/figures/23_sensibilidad_rhab.jpg}
+  \caption{Sensibilidad de la máscara urbana al umbral
+    $r_{\text{hab}}$. A $300$\,m cubre $98\,\%$ del territorio
+    interno; a $500$\,m cubre $99.7\,\%$.}
+  \label{fig:sensibilidad}
+\end{figure}
+
+\subsection{Visualizaciones interactivas}
+
+Como complemento al reporte estático, se generaron cuatro mapas
+interactivos en formato HTML (Folium) que permiten explorar la red
+con \emph{zoom}, capas conmutables y \emph{pop-ups} con metadatos:
+\texttt{mapa\_interactivo\_tipos.html} (distribución por tipo con
+\emph{clusters}),
+\texttt{mapa\_heatmap\_densidad.html} (mapa de calor general y de
+hospitales),
+\texttt{mapa\_cobertura\_500m.html} (círculos de cobertura
+$r=500$\,m por sector), y
+\texttt{mapa\_aislados\_hospitales.html} (aislados $p_{90}$ y
+hospitales georreferenciados).
+Estos artefactos acompañan al reporte en la carpeta \texttt{outputs/}.
+
+% ═══════════════════════════════════════
+\section{Conclusiones y recomendaciones}
+
+La persistencia homológica permite caracterizar estructuralmente la
+red de servicios de salud de Iztapalapa más allá de métricas de
+densidad. Los hallazgos cuantitativos principales son:
+
+\begin{enumerate}
+  \item \textbf{Conectividad.}
+        La red alcanza conexión sustancial a $r\approx500$\,m, pero
+        $57$ establecimientos ($10\,\%$) permanecen aislados más allá
+        de $359$\,m (umbral $p_{90}$).
+
+  \item \textbf{Vacíos estructurales.}
+        Existen $14$ ciclos $H_1$ significativos
+        ($d-b>\mu+\sigma=317$\,m); el mayor mide $1{,}377$\,m de
+        diámetro y se ubica en el sur-oriente de la alcaldía.
+
+  \item \textbf{Asimetría público--privado.}
+        El sector privado ($87.4\,\%$ de las unidades) concentra la
+        oferta en el centro-norte; el sector público es más disperso
+        y deja los huecos $H_1$ más persistentes sin cubrir.
+\end{enumerate}
+
+\noindent\textbf{De ciclos persistentes a recomendaciones.}
+Los ciclos $H_1$ persistentes deben interpretarse como candidatos
+\emph{preliminares} de brechas de cobertura. Tras aplicar la
+máscara de actividad urbana del DENUE completo
+(Sección~\ref{sec:validacion}), únicamente los ciclos cuyo
+interior coincide principalmente con zonas urbanas activas se
+consideran \emph{huecos accionables}; los ubicados sobre la Sierra
+de Santa Catarina, áreas verdes o equipamientos no residenciales
+se clasifican como falsos positivos territoriales.
+
+\noindent\textbf{Recomendación de política pública.}
+Bajo el criterio conservador ($r_{\text{hab}}=300$\,m), los
+candidatos \emph{accionables} son:
+\begin{itemize}\itemsep0pt
+  \item \textbf{P1 — Leyes de Reforma 3a Sec.} (CP 09310),
+        hueco $1{,}561$\,m, interior $100\,\%$ urbano.
+  \item \textbf{P4 — Central de Abastos} (CP 09040),
+        hueco $1{,}169$\,m, interior $100\,\%$ urbano.
+\end{itemize}
+Los candidatos \emph{mixtos} P3 (Lomas de la Estancia) y P5
+(San Juan Xalpa) requieren validación con datos de población AGEB
+antes de comprometer inversión; al umbral $500$\,m ambos cruzan a
+accionables. P2 (Campestre Potrero) se descarta como falso
+positivo territorial por su solapamiento con la Sierra de Santa
+Catarina.
+La simulación de inserción con los cinco candidatos reduce la
+persistencia máxima de $H_1$ en $31\,\%$ ($1{,}377\to953$\,m);
+restringiendo a los dos accionables se obtiene una reducción
+parcial, pero defendible territorialmente.
+
+\noindent\textbf{Recomendación de negocio.}
+Para un operador privado de consultorios o farmacias con servicio
+médico, P1 y P4 son los mercados más sólidos: zonas con demanda
+potencial dentro de un radio caminable ($<1$\,km), sin competencia
+directa y plenamente urbanizadas. P4 destaca adicionalmente por la
+conectividad vial generada por la Central de Abastos y el flujo
+diario de trabajadores.
+
+\noindent\textbf{Valor del enfoque topológico.}
+A diferencia de los análisis de densidad poblacional —que sólo
+identifican zonas \emph{de baja densidad}—, la persistencia $H_1$
+detecta vacíos \emph{estructurales}: regiones rodeadas de oferta
+pero sin acceso interno. La combinación de persistencia $H_1$ con
+una máscara territorial DENUE permite focalizar la inversión
+donde una sola unidad nueva tiene el mayor impacto marginal en la
+cobertura de la red, distinguiendo huecos reales de huecos
+geográficos sin demanda residencial.
+
+% ═══════════════════════════════════════
+\begin{thebibliography}{9}
+
+\bibitem{ripser}
+U.~Bauer, ``Ripser: efficient computation of Vietoris--Rips
+persistence barcodes,'' \emph{J. Appl. Comput. Topol.}, vol.~5,
+pp.~391--423, 2021.
+
+\bibitem{edelsbrunner}
+H.~Edelsbrunner y J.~Harer, \emph{Computational Topology: An
+Introduction}. Amer. Math. Soc., 2010.
+
+\bibitem{gudhi}
+GUDHI Project, ``GUDHI User and Reference Manual,'' v3.12.0, 2024.
+\url{https://gudhi.inria.fr/}
+
+\bibitem{denue}
+INEGI, ``Directorio Estadístico Nacional de Unidades Económicas
+(DENUE) 2025.'' México, 2025.
+
+\end{thebibliography}
+
+\end{document}
