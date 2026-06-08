@@ -1,1 +1,5 @@
 db.csv
+
+# DENUE completo CDMX (>100 MB, no sube a GitHub)
+data/denue_full/
+data/censo_ageb/*.zip
