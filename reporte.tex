@@ -13,6 +13,7 @@
 \usepackage{parskip}
 \usepackage{cite}
 
+
 \geometry{
   top=1.8cm, bottom=1.8cm,
   left=1.5cm, right=1.5cm,
@@ -51,8 +52,9 @@ se construyen complejos simpliciales de Vietoris--Rips y Alpha
 (equivalente homológico al complejo de \v{C}ech) para calcular la
 persistencia en dimensiones $H_0$ (conectividad) y $H_1$ (vacíos de
 cobertura).
-Los resultados muestran que el $87.4\%$ son consultorios privados, con
-distancia mediana entre vecinos de 161.71\,m.
+Los resultados muestran que el $87.4\%$ pertenece al sector privado
+(el $79.6\%$ son consultorios generales privados), con distancia
+mediana entre vecinos de 161.71\,m.
 Se identifican ciclos $H_1$ persistentes que señalan zonas con anillos
 de cobertura pero sin servicio interior, constituyendo candidatos
 prioritarios para la instalación de nuevas unidades públicas de salud.
@@ -85,7 +87,7 @@ y estrategia de negocio en el sector salud.
 
 Se utilizan los datos abiertos del DENUE 2025 (INEGI) \cite{denue},
 filtrando los registros con \texttt{cve\_ent}$=9$ y
-\texttt{cve\_mun}$=10$ (Iztapalapa).
+\texttt{cve\_mun}$=7$ (Iztapalapa).
 Se seleccionaron seis códigos SCIAN de salud general.
 Tras la limpieza, se obtienen $n=563$ puntos con coordenadas válidas.
 
@@ -133,11 +135,9 @@ Se evalúan radios $r\in\{300,700,1200,2000\}$\,m para visualización
 completa, usando \texttt{Ripser} \cite{ripser}.
 
 La Figura~\ref{fig:vr_evolucion} ilustra la evolución del complejo al
-crecer el radio: a $r=300$\,m sólo existen 15~aristas locales; a
-$r=700$\,m emergen los primeros ciclos de corto alcance; a
-$r=1{,}200$\,m se consolidan triángulos en las zonas más densas; a
-$r=2{,}000$\,m la red alcanza 295~aristas y conecta la mayor parte
-de la alcaldía.
+crecer el radio: de 15~aristas locales a $r=300$\,m, pasando por los
+primeros ciclos a $700$\,m, hasta $295$~aristas que conectan la mayor
+parte de la alcaldía a $r=2{,}000$\,m.
 
 \begin{figure}[H]
   \centering
@@ -181,29 +181,9 @@ La relación de intercalación
 $\mathrm{VR}(r)\subseteq\check{C}(r)\subseteq\mathrm{VR}(2r)$
 garantiza equivalencia homológica.
 
-La Figura~\ref{fig:complejos} compara ambos complejos a radio
-equivalente: el VR a $r=1{,}000$\,m y el Alpha con
-$\alpha^2\leq700^2$\,m$^2$; ambos comparten la misma homología
-pero el Alpha requiere significativamente menos símplices.
-
-\begin{figure}[H]
-  \centering
-  \begin{subfigure}[b]{0.48\linewidth}
-    \includegraphics[width=\linewidth]%
-      {outputs/figures/complejo_vietoris_rips_iztapalapa_1000m.jpg}
-    \caption{Vietoris--Rips ($r=1000$\,m)}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[b]{0.48\linewidth}
-    \includegraphics[width=\linewidth]%
-      {outputs/figures/12_complejo_alpha_iztapalapa.jpg}
-    \caption{Alpha / \v{C}ech ($\alpha^2\leq700^2$\,m$^2$)}
-  \end{subfigure}
-  \caption{Complejos simpliciales sobre submuestra $n=80$ con el límite
-    de Iztapalapa. Aristas en azul, triángulos en azul claro,
-    vértices en rojo.}
-  \label{fig:complejos}
-\end{figure}
+Comparados a radio equivalente (VR a $r=1{,}000$\,m y Alpha con
+$\alpha^2\leq700^2$\,m$^2$), ambos comparten la misma homología pero
+el Alpha requiere significativamente menos símplices.
 
 \subsection{Persistencia homológica}
 
@@ -287,24 +267,35 @@ ruido topológico.
 \begin{table}[H]
 \centering
 \small
-\caption{Estadísticas por sector.}
+\caption{Estadísticas espaciales por sector. NNI es el índice del
+  vecino más cercano (Clark--Evans): $<1$ agrupado, $\approx1$
+  aleatorio, $>1$ disperso/regular.}
 \label{tab:sector}
 \begin{tabular}{lcc}
 \toprule
 \textbf{Métrica} & \textbf{Privado} & \textbf{Público} \\
 \midrule
-Establecimientos   & 492 (87.4\%) & 71 (12.6\%) \\
-Dist. mediana (m)  & $\sim$155 & $\sim$800 \\
-Aislados (p90)     & 47 & 10 \\
-Persistencia $H_1$ & baja varianza & alta varianza \\
+Establecimientos        & 492 (87.4\%) & 71 (12.6\%) \\
+Dist. vecino, mediana (m)& 170 & 562 \\
+Dist. vecino, media (m)  & 199 & 608 \\
+NNI (Clark--Evans)       & 0.83 & 0.96 \\
+Dist. al centroide (m)   & 4{,}226 & 4{,}467 \\
+Aislados (p90)           & 50 & 7 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-La red pública, más dispersa, genera ciclos $H_1$ de mayor
-persistencia individual —brechas de acceso más críticas— respecto a
-la red privada, cuya mayor densidad produce ciclos más cortos y
-numerosos.
+Las dos redes exhiben tipos de \emph{dispersión} distintos.
+El sector privado, mucho más numeroso, presenta una distribución
+\textbf{agrupada y heterogénea} (NNI $=0.83$): se concentra en
+conglomerados densos —vecinos a $\sim$170\,m— en las colonias de mayor
+demanda, dejando zonas sin cobertura privada.
+El sector público, con sólo $71$ unidades, se distribuye de forma casi
+\textbf{aleatoria-uniforme} (NNI $=0.96$) pero muy espaciada (vecinos a
+$\sim$562\,m), repartido por el territorio con baja densidad.
+Esta heterogeneidad del sector privado, más que la separación del
+público, es la que genera los anillos de cobertura con vacío interior
+detectados en $H_1$.
 La Figura~\ref{fig:aislados} localiza los $57$ establecimientos
 aislados ($d>359$\,m al vecino más cercano), concentrados en la franja
 sur-oriente de la alcaldía.
@@ -475,109 +466,103 @@ falso positivo o mixto.
 \end{figure}
 
 \textbf{Sensibilidad al umbral.}
-La Figura~\ref{fig:sensibilidad} compara las máscaras a $300$ y
-$500$\,m. Subir el umbral a $500$\,m cubre el $99.7\,\%$ del
-territorio y reclasifica P2, P3, P5 como accionables; sólo el
-interior periférico de la Sierra queda fuera. Conservadoramente,
-adoptamos el umbral $300$\,m como criterio principal y reportamos
-$500$\,m como cota superior.
+Subir el umbral a $r_{\text{hab}}=500$\,m cubre el $99.7\,\%$ del
+territorio (frente a $98\,\%$ a $300$\,m) y reclasifica P2, P3 y P5
+como accionables; sólo el interior periférico de la Sierra queda
+fuera. Conservadoramente adoptamos $300$\,m como criterio principal
+y $500$\,m como cota superior.
+
+\subsection{Acceso socioeconómico por zona (AGEB)}
+\label{sec:acceso}
+
+Para traducir la topología a impacto social se cruza la red con la
+población del Censo 2020 (INEGI) a nivel AGEB ($1{,}834{,}225$\,hab
+en $457$ AGEBs). Para cada AGEB se mide la distancia al hospital
+general más cercano —euclidiana en metros $\times1.3$ (factor de
+rodeo)— y el tiempo caminando ($4.5$\,km/h) y en auto ($20$\,km/h).
+
+\textbf{Acceso actual.} La atención primaria está saturada (cualquier
+consultorio a $\sim$3\,min), pero los hospitales no: la mediana
+poblacional al hospital es $1{,}228$\,m ($16.4$\,min caminando), con
+el $54.6\,\%$ de la población ($1.0$\,M) a $>15$\,min y el $15.8\,\%$
+($290$\,mil) a $>30$\,min de un hospital general.
+
+\textbf{Brecha público--privado.} Para el $45.1\,\%$ de la población
+($827$\,mil) el hospital más cercano es privado (de pago); la opción
+pública gratuita queda a $1{,}607$\,m mediana ($21.4$\,min), con un
+$28.1\,\%$ ($515$\,mil) a $>30$\,min caminando del hospital público.
+Esto materializa el costo social de la heterogeneidad del sector
+privado (Tabla~\ref{tab:sector}): se concentra donde hay poder
+adquisitivo y deja a la periferia dependiendo del escaso público.
+
+\textbf{Impacto de la propuesta.} Insertar las cinco ubicaciones como
+unidades públicas reduce la población a $>30$\,min del hospital
+público de $28.1\,\%$ a $20.6\,\%$: \textbf{$136{,}620$ personas}
+dejan esa franja ($44{,}335$ con sólo los dos accionables P1 y P4).
+Como las ubicaciones provienen de los huecos $H_1$ periféricos, el
+beneficio se concentra en las zonas hoy peor servidas
+(Figura~\ref{fig:acceso}).
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\linewidth]%
-    {outputs/figures/23_sensibilidad_rhab.jpg}
-  \caption{Sensibilidad de la máscara urbana al umbral
-    $r_{\text{hab}}$. A $300$\,m cubre $98\,\%$ del territorio
-    interno; a $500$\,m cubre $99.7\,\%$.}
-  \label{fig:sensibilidad}
+    {outputs/figures/27_simulacion_acceso_antes_despues.png}
+  \caption{Tiempo caminando al hospital público por AGEB (tamaño =
+    población). Izquierda: situación actual. Derecha: con las cinco
+    unidades propuestas (estrellas verdes); la periferia roja se
+    aclara.}
+  \label{fig:acceso}
 \end{figure}
 
 \subsection{Visualizaciones interactivas}
 
-Como complemento al reporte estático, se generaron cuatro mapas
-interactivos en formato HTML (Folium) que permiten explorar la red
-con \emph{zoom}, capas conmutables y \emph{pop-ups} con metadatos:
-\texttt{mapa\_interactivo\_tipos.html} (distribución por tipo con
-\emph{clusters}),
-\texttt{mapa\_heatmap\_densidad.html} (mapa de calor general y de
-hospitales),
-\texttt{mapa\_cobertura\_500m.html} (círculos de cobertura
-$r=500$\,m por sector), y
-\texttt{mapa\_aislados\_hospitales.html} (aislados $p_{90}$ y
-hospitales georreferenciados).
-Estos artefactos acompañan al reporte en la carpeta \texttt{outputs/}.
+Como complemento, se generaron cuatro mapas interactivos HTML
+(Folium) con \emph{zoom}, capas conmutables y \emph{pop-ups},
+incluidos en \texttt{outputs/}: distribución por tipo con
+\emph{clusters}, mapa de calor de densidad, círculos de cobertura
+$r=500$\,m por sector, y establecimientos aislados ($p_{90}$) con
+hospitales georreferenciados.
 
 % ═══════════════════════════════════════
 \section{Conclusiones y recomendaciones}
 
-La persistencia homológica permite caracterizar estructuralmente la
-red de servicios de salud de Iztapalapa más allá de métricas de
-densidad. Los hallazgos cuantitativos principales son:
+La persistencia homológica caracteriza estructuralmente la red de
+salud de Iztapalapa más allá de métricas de densidad.
+Los hallazgos principales son: (i)~\textbf{conectividad} sustancial a
+$r\approx500$\,m, con $57$ establecimientos ($10\,\%$) aislados más
+allá de $359$\,m ($p_{90}$); (ii)~\textbf{vacíos estructurales}: $14$
+ciclos $H_1$ significativos ($d-b>317$\,m), el mayor de $1{,}377$\,m
+en el sur-oriente; (iii)~\textbf{asimetría público--privado}: el
+sector privado, agrupado y heterogéneo (NNI~$=0.83$), concentra la
+oferta en conglomerados densos y deja entre ellos los anillos con
+vacío interior; el público, espaciado pero uniforme (NNI~$=0.96$),
+no alcanza a cubrirlos.
 
-\begin{enumerate}
-  \item \textbf{Conectividad.}
-        La red alcanza conexión sustancial a $r\approx500$\,m, pero
-        $57$ establecimientos ($10\,\%$) permanecen aislados más allá
-        de $359$\,m (umbral $p_{90}$).
+\noindent\textbf{Recomendaciones.}
+Tras la máscara de actividad urbana (Sección~\ref{sec:validacion}),
+sólo los ciclos cuyo interior coincide con zona urbana activa son
+\emph{huecos accionables}.
+Bajo el criterio conservador ($r_{\text{hab}}=300$\,m) destacan
+\textbf{P1} (Leyes de Reforma 3a~Sec., hueco $1{,}561$\,m) y
+\textbf{P4} (Central de Abastos, hueco $1{,}169$\,m), ambos $100\,\%$
+urbanos: son a la vez la prioridad de \emph{política pública} y los
+mercados más sólidos para un operador privado —demanda caminable
+($<1$\,km), sin competencia directa y plenamente urbanizados (P4
+suma la conectividad vial de la Central de Abastos).
+Los \emph{mixtos} P3 (Lomas de la Estancia) y P5 (San Juan Xalpa)
+requieren validación con población AGEB antes de invertir, aunque a
+$500$\,m cruzan a accionables; P2 (Campestre Potrero) se descarta
+por solaparse con la Sierra de Santa Catarina.
+La inserción de los cinco candidatos reduce la persistencia máxima
+de $H_1$ en $31\,\%$ ($1{,}377\to953$\,m).
 
-  \item \textbf{Vacíos estructurales.}
-        Existen $14$ ciclos $H_1$ significativos
-        ($d-b>\mu+\sigma=317$\,m); el mayor mide $1{,}377$\,m de
-        diámetro y se ubica en el sur-oriente de la alcaldía.
-
-  \item \textbf{Asimetría público--privado.}
-        El sector privado ($87.4\,\%$ de las unidades) concentra la
-        oferta en el centro-norte; el sector público es más disperso
-        y deja los huecos $H_1$ más persistentes sin cubrir.
-\end{enumerate}
-
-\noindent\textbf{De ciclos persistentes a recomendaciones.}
-Los ciclos $H_1$ persistentes deben interpretarse como candidatos
-\emph{preliminares} de brechas de cobertura. Tras aplicar la
-máscara de actividad urbana del DENUE completo
-(Sección~\ref{sec:validacion}), únicamente los ciclos cuyo
-interior coincide principalmente con zonas urbanas activas se
-consideran \emph{huecos accionables}; los ubicados sobre la Sierra
-de Santa Catarina, áreas verdes o equipamientos no residenciales
-se clasifican como falsos positivos territoriales.
-
-\noindent\textbf{Recomendación de política pública.}
-Bajo el criterio conservador ($r_{\text{hab}}=300$\,m), los
-candidatos \emph{accionables} son:
-\begin{itemize}\itemsep0pt
-  \item \textbf{P1 — Leyes de Reforma 3a Sec.} (CP 09310),
-        hueco $1{,}561$\,m, interior $100\,\%$ urbano.
-  \item \textbf{P4 — Central de Abastos} (CP 09040),
-        hueco $1{,}169$\,m, interior $100\,\%$ urbano.
-\end{itemize}
-Los candidatos \emph{mixtos} P3 (Lomas de la Estancia) y P5
-(San Juan Xalpa) requieren validación con datos de población AGEB
-antes de comprometer inversión; al umbral $500$\,m ambos cruzan a
-accionables. P2 (Campestre Potrero) se descarta como falso
-positivo territorial por su solapamiento con la Sierra de Santa
-Catarina.
-La simulación de inserción con los cinco candidatos reduce la
-persistencia máxima de $H_1$ en $31\,\%$ ($1{,}377\to953$\,m);
-restringiendo a los dos accionables se obtiene una reducción
-parcial, pero defendible territorialmente.
-
-\noindent\textbf{Recomendación de negocio.}
-Para un operador privado de consultorios o farmacias con servicio
-médico, P1 y P4 son los mercados más sólidos: zonas con demanda
-potencial dentro de un radio caminable ($<1$\,km), sin competencia
-directa y plenamente urbanizadas. P4 destaca adicionalmente por la
-conectividad vial generada por la Central de Abastos y el flujo
-diario de trabajadores.
-
-\noindent\textbf{Valor del enfoque topológico.}
-A diferencia de los análisis de densidad poblacional —que sólo
-identifican zonas \emph{de baja densidad}—, la persistencia $H_1$
-detecta vacíos \emph{estructurales}: regiones rodeadas de oferta
-pero sin acceso interno. La combinación de persistencia $H_1$ con
-una máscara territorial DENUE permite focalizar la inversión
-donde una sola unidad nueva tiene el mayor impacto marginal en la
-cobertura de la red, distinguiendo huecos reales de huecos
-geográficos sin demanda residencial.
+\noindent\textbf{Valor del enfoque.}
+A diferencia del análisis de densidad —que sólo señala zonas de baja
+densidad—, la persistencia $H_1$ detecta vacíos \emph{estructurales}
+(regiones rodeadas de oferta pero sin acceso interno); combinada con
+la máscara territorial DENUE, focaliza la inversión donde una sola
+unidad nueva tiene el mayor impacto marginal en la cobertura,
+distinguiendo huecos reales de huecos sin demanda residencial.
 
 % ═══════════════════════════════════════
 \begin{thebibliography}{9}
